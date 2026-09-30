@@ -1,39 +1,67 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/form-mahasiswa', function () {
+    return view('form-mahasiswa');
 });
 
-Route::get('/latihan-php', function () {
+Route::post('/form-mahasiswa', function (Request $request) {
 
-    $nama = 'Farael Ahmad';
+    $dataBersih = [
+        'nama' => strip_tags(trim((string) $request->input('nama'))),
 
-    $nilai = [80, 75, 90, 85, 88];
+        'email' => filter_var(
+            (string) $request->input('email'),
+            FILTER_SANITIZE_EMAIL
+        ),
 
-    $hitungRataRata = function (array $data): float {
-        $total = 0;
+        'usia' => trim((string) $request->input('usia')),
 
-        foreach ($data as $angka) {
-            $total += $angka;
-        }
+        'nim' => trim((string) $request->input('nim')),
+    ];
 
-        return $total / count($data);
-    };
+    $validator = Validator::make($dataBersih, [
 
-    $rataRata = $hitungRataRata($nilai);
+        'nama' => ['required', 'min:3', 'max:50'],
 
-    if ($rataRata >= 75) {
-        $status = 'Lulus';
-    } else {
-        $status = 'Perlu Perbaikan';
+        'email' => ['required', 'email'],
+
+        'usia' => ['required', 'integer', 'min:17', 'max:60'],
+
+        'nim' => ['required', 'digits_between:8,12'],
+
+    ], [
+
+        'nama.required' => 'Nama wajib diisi.',
+        'nama.min' => 'Nama minimal 3 karakter.',
+        'nama.max' => 'Nama maksimal 50 karakter.',
+
+        'email.required' => 'Email wajib diisi.',
+        'email.email' => 'Format email tidak valid.',
+
+        'usia.required' => 'Usia wajib diisi.',
+        'usia.integer' => 'Usia harus berupa angka.',
+        'usia.min' => 'Usia minimal 17 tahun.',
+        'usia.max' => 'Usia maksimal 60 tahun.',
+
+        'nim.required' => 'NIM wajib diisi.',
+        'nim.digits_between' => 'NIM harus terdiri dari 8 sampai 12 digit.',
+
+    ]);
+
+    if ($validator->fails()) {
+
+        return redirect('/form-mahasiswa')
+            ->withErrors($validator)
+            ->withInput();
     }
 
-    return view('latihan-php', compact(
-        'nama',
-        'nilai',
-        'rataRata',
-        'status'
-    ));
+    $data = $validator->validated();
+
+    $data['usia'] = (int) $data['usia'];
+
+    return view('hasil-form', ['data' => $data]);
 });
