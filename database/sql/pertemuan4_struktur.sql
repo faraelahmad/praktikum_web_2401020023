@@ -1,3 +1,4 @@
+-- Pertemuan 4: Perancangan Basis Data dan SQL Dasar
 CREATE DATABASE IF NOT EXISTS praktikum_web
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;

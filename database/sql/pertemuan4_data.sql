@@ -1,3 +1,4 @@
+-- Pertemuan 4: DML Program Studi dan Mahasiswa
 USE praktikum_web;
 
 INSERT INTO program_studi (nama_prodi) VALUES
