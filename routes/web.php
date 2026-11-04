@@ -4,6 +4,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BukuController;
 
 
 
@@ -608,3 +609,11 @@ Route::delete('/inventaris/{id}', function ($id) {
         );
     }
 })->whereNumber('id')->name('inventaris.destroy');
+
+// Route daftar buku
+Route::get('/buku', [BukuController::class, 'index'])
+    ->name('buku.index');
+
+// Route detail buku
+Route::get('/buku/{kode}', [BukuController::class, 'show'])
+    ->name('buku.show');
