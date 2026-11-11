@@ -610,10 +610,4 @@ Route::delete('/inventaris/{id}', function ($id) {
     }
 })->whereNumber('id')->name('inventaris.destroy');
 
-// Route daftar buku
-Route::get('/buku', [BukuController::class, 'index'])
-    ->name('buku.index');
-
-// Route detail buku
-Route::get('/buku/{kode}', [BukuController::class, 'show'])
-    ->name('buku.show');
+Route::resource('buku', BukuController::class)->except('show');

@@ -3,47 +3,69 @@
 namespace App\Http\Controllers;
 
 use App\Models\Buku;
+use App\Models\Kategori;
 use Illuminate\Http\Request;
 
 class BukuController extends Controller
 {
-    // Menampilkan daftar buku dan pencarian
-    public function index(Request $request)
+    public function index()
     {
-        $daftarBuku = Buku::contoh();
-        $keyword = $request->query('q');
+        $bukus = Buku::with('kategori')->latest()->get();
 
-        if ($keyword) {
-            $daftarBuku = array_filter($daftarBuku, function ($buku) use ($keyword) {
-                return stripos($buku['kode'], $keyword) !== false ||
-                       stripos($buku['judul'], $keyword) !== false;
-            });
-        }
-
-        return view('buku.index', [
-            'daftarBuku' => $daftarBuku,
-            'keyword' => $keyword
-        ]);
+        return view('buku.index', compact('bukus'));
     }
 
-    // Menampilkan detail buku
-    public function show($kode)
+    public function create()
     {
-        $daftarBuku = Buku::contoh();
-        $buku = null;
+        $kategoris = Kategori::all();
 
-        foreach ($daftarBuku as $item) {
-            if ($item['kode'] === $kode) {
-                $buku = $item;
-                break;
-            }
-        }
+        return view('buku.form', compact('kategoris'));
+    }
 
-        if (!$buku) {
-            abort(404);
-        }
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'kode' => 'required|string|max:10|unique:bukus,kode',
+            'judul' => 'required|string|max:255',
+            'kategori_id' => 'required|exists:kategoris,id',
+        ]);
 
-        return view('buku.show', compact('buku'));
+        Buku::create($validated);
+
+        return redirect()->route('buku.index')
+            ->with('success', 'Buku berhasil ditambahkan.');
+    }
+
+    public function edit(string $id)
+    {
+        $buku = Buku::findOrFail($id);
+        $kategoris = Kategori::all();
+
+        return view('buku.form', compact('buku', 'kategoris'));
+    }
+
+    public function update(Request $request, string $id)
+    {
+        $buku = Buku::findOrFail($id);
+
+        $validated = $request->validate([
+            'kode' => 'required|string|max:10|unique:bukus,kode,' . $buku->id,
+            'judul' => 'required|string|max:255',
+            'kategori_id' => 'required|exists:kategoris,id',
+        ]);
+
+        $buku->update($validated);
+
+        return redirect()->route('buku.index')
+            ->with('success', 'Buku berhasil diperbarui.');
+    }
+
+    public function destroy(string $id)
+    {
+        $buku = Buku::findOrFail($id);
+        $buku->delete();
+
+        return redirect()->route('buku.index')
+            ->with('success', 'Buku berhasil dihapus.');
     }
 }
-
