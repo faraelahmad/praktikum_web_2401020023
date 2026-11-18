@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BukuController;
+use App\Http\Controllers\Auth\LoginController;
 
 
 
@@ -610,4 +611,15 @@ Route::delete('/inventaris/{id}', function ($id) {
     }
 })->whereNumber('id')->name('inventaris.destroy');
 
-Route::resource('buku', BukuController::class)->except('show');
+Route::middleware('auth')->group(function () {
+    Route::resource('buku', BukuController::class)->except('show');
+});
+
+Route::get('/login', [LoginController::class, 'show'])
+    ->name('login');
+
+Route::post('/login', [LoginController::class, 'login'])
+    ->name('login.proses');
+
+Route::post('/logout', [LoginController::class, 'logout'])
+    ->name('logout');
